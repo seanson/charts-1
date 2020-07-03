@@ -15,5 +15,5 @@ spec:
   - {{ include "gcloud-sqlproxy.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
   issuerRef:
     name: {{ .Values.ghostunnel.selfSignedCertificate.issuer }}
-    kind: {{ .Values.ghostunnel.selfSignedCertificate.issuerKind }}
+    kind: {{ .Values.ghostunnel.selfSignedCertificate.kind }}
 {{- end }}
