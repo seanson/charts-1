@@ -99,11 +99,12 @@ spec:
         - server
         - --listen=localhost:{{ .port }}
         - --target=localhost:{{ add 10000 .port }}
-        - --keystore=/secrets/sqltunnel/tls.key
-        - --cacert=/secrets/sqltunnel/tls.crt
+        - --cert=/secrets/sqltunnel/tls.key
+        - --key=/secrets/sqltunnel/tls.crt
+        - --cacert=/secrets/sqltunnel/ca.crt
         - --allow-cn=all
         ports:
-        - name: ghostunnel
+        - name: ghostunnel-{{ $index }}
           containerPort: {{ .port }}
         {{- if $.Values.ghostunnel.selfSignedCertificate.enabled }}
         volumeMounts:

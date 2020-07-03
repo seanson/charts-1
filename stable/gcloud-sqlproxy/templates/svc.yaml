@@ -14,11 +14,15 @@ spec:
   loadBalancerIP: {{ .Values.service.loadBalancerIP }}
   {{- end }}
   ports:
-  {{- range .Values.cloudsql.instances }}
+  {{- range $index, $value := .Values.cloudsql.instances }}
   - name: {{ .instanceShortName | default (.instance | trunc 15) }}
     protocol: TCP
     port: {{ .port }}
+    {{- if .secure }}
+    targetPort: ghostunnel-{{ $index }}
+    {{- else }}
     targetPort: {{ .instanceShortName | default (.instance | trunc 15) }}
+    {{- end }}
   {{- end }}
   selector:
     {{- include "gcloud-sqlproxy.selectorLabels" . | nindent 4 }}
