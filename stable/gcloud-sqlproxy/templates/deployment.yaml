@@ -99,8 +99,8 @@ spec:
         - server
         - --listen=localhost:{{ .port }}
         - --target=localhost:{{ add 10000 .port }}
-        - --keystore=/keys/sqltunnel/tls.key
-        - --cacert=/keys/sqltunnel/tls.crt
+        - --keystore=/secrets/sqltunnel/tls.key
+        - --cacert=/secrets/sqltunnel/tls.crt
         - --allow-cn=all
         ports:
         - name: ghostunnel
