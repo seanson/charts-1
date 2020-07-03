@@ -1,11 +1,12 @@
-{{- if .Values.ghosttunnel.selfSignedCertificate.enabled }}
+{{- if .Values.ghostunnel.selfSignedCertificate.enabled }}
 apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
 metadata:
   name: {{ include "gcloud-sqlproxy.fullname" . }}
   labels:
     {{- include "gcloud-sqlproxy.labels" . | nindent 4 }}
 spec:
-  secretName: tls-{{ include "gcloud-sqlproxy.fullname" . }}
+  secretName: tls-{{ include "gcloud-sqlproxy.secretName" . }}
   dnsNames:
   - {{ include "gcloud-sqlproxy.fullname" . }}
   - {{ include "gcloud-sqlproxy.fullname" . }}.{{ .Release.Namespace }}
@@ -13,6 +14,6 @@ spec:
   - {{ include "gcloud-sqlproxy.fullname" . }}.{{ .Release.Namespace }}.svc.cluster
   - {{ include "gcloud-sqlproxy.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
   issuerRef:
-    name: {{ .Values.ghosttunnel.selfSignedCertificate.issuer }}
-    kind: {{ .Values.ghosttunnel.selfSignedCertificate.issuerKind }}
+    name: {{ .Values.ghostunnel.selfSignedCertificate.issuer }}
+    kind: {{ .Values.ghostunnel.selfSignedCertificate.issuerKind }}
 {{- end }}

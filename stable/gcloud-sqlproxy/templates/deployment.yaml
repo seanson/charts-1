@@ -36,7 +36,7 @@ spec:
         - /cloud_sql_proxy
         - --dir=/cloudsql
         - -instances={{- range $index, $value := .Values.cloudsql.instances -}}
-                        {{- if .secure }}
+                        {{- if .secure -}}
                         {{ .project }}:{{ .region }}:{{ .instance }}=tcp:127.0.0.1:{{ add 10000 .port }},
                         {{- else -}}
                         {{ .project }}:{{ .region }}:{{ .instance }}=tcp:0.0.0.0:{{ .port }},
@@ -54,7 +54,10 @@ spec:
         {{- end }}
         ports:
         {{- range .Values.cloudsql.instances }}
-        {{- if not .secure }}
+        {{- if .secure }}
+        - name: {{ .instanceShortName | default (.instance | trunc 15) }}
+          containerPort: {{ add 10000 .port }}
+        {{- else }}
         - name: {{ .instanceShortName | default (.instance | trunc 15) }}
           containerPort: {{ .port }}
         {{- end }}
@@ -96,13 +99,17 @@ spec:
         - server
         - --listen=localhost:{{ .port }}
         - --target=localhost:{{ add 10000 .port }}
-        - --keystore test-keys/server-keystore.p12
-        - --cacert test-keys/cacert.pem
-        - --allow-cn client
+        - --keystore=/keys/sqltunnel/tls.key
+        - --cacert=/keys/sqltunnel/tls.crt
+        - --allow-cn=all
         ports:
         - name: ghostunnel
           containerPort: {{ .port }}
-
+        {{- if $.Values.ghostunnel.selfSignedCertificate.enabled }}
+        volumeMounts:
+        - name: ghostunnel-tls-certificate
+          mountPath: /secrets/sqltunnel
+        {{ end -}}
 {{- end }}
 {{- end }}
       volumes:
@@ -110,6 +117,11 @@ spec:
       - name: cloudsql-oauth-credentials
         secret:
           secretName: {{ include "gcloud-sqlproxy.secretName" . }}
+      {{ end -}}
+      {{ if .Values.ghostunnel.selfSignedCertificate.enabled -}}
+      - name: ghostunnel-tls-certificate
+        secret:
+          secretName: tls-{{ include "gcloud-sqlproxy.secretName" . }}
       {{ end -}}
       - name: cloudsql
         emptyDir: {}
