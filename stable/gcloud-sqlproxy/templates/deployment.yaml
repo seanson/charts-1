@@ -35,8 +35,12 @@ spec:
         command:
         - /cloud_sql_proxy
         - --dir=/cloudsql
-        - -instances={{- range .Values.cloudsql.instances -}}
+        - -instances={{- range $index, $value := .Values.cloudsql.instances -}}
+                        {{- if .secure }}
+                        {{ .project }}:{{ .region }}:{{ .instance }}=tcp:127.0.0.1:{{ add 10000 .port }},
+                        {{- else -}}
                         {{ .project }}:{{ .region }}:{{ .instance }}=tcp:0.0.0.0:{{ .port }},
+                        {{- end -}}
                      {{- end }}
         {{ if $hasCredentials -}}
         - -credential_file=/secrets/cloudsql/{{ include "gcloud-sqlproxy.secretKey" . }}
@@ -50,8 +54,10 @@ spec:
         {{- end }}
         ports:
         {{- range .Values.cloudsql.instances }}
+        {{- if not .secure }}
         - name: {{ .instanceShortName | default (.instance | trunc 15) }}
           containerPort: {{ .port }}
+        {{- end }}
         {{- end }}
         {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
@@ -80,6 +86,25 @@ spec:
         {{ end -}}
         - name: cloudsql
           mountPath: /cloudsql
+{{- range $index, $value := .Values.cloudsql.instances -}}
+{{- if .secure }}
+      - name: ghostunnel-{{ $index }}
+        image: "{{ $.Values.ghostunnel.image }}:{{ $.Values.ghostunnel.imageTag }}"
+        imagePullPolicy: {{ default "" $.Values.ghostunnel.imagePullPolicy | quote }}
+        command:
+        - ghostunnel
+        - server
+        - --listen=localhost:{{ .port }}
+        - --target=localhost:{{ add 10000 .port }}
+        - --keystore test-keys/server-keystore.p12
+        - --cacert test-keys/cacert.pem
+        - --allow-cn client
+        ports:
+        - name: ghostunnel
+          containerPort: {{ .port }}
+
+{{- end }}
+{{- end }}
       volumes:
       {{ if $hasCredentials -}}
       - name: cloudsql-oauth-credentials

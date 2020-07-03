@@ -45,17 +45,18 @@ cloudsql:
   ## Use different ports for different instances.
   instances:
     # GCP instance name.
-  - instance: "instance"
-    # Optional abbreviation used to override the truncated instance name if the
-    # 15 character instance name prefix is not unique for use as a port
-    # identifier.
-    instanceShortName: ""
-    # GCP project where the instance exists.
-    project: "project"
-    # GCP region where the instance exists.
-    region: "region"
-    # Port number for the proxy to expose for this instance.
-    port: 5432
+    - instance: "instance"
+      # Optional abbreviation used to override the truncated instance name if the
+      # 15 character instance name prefix is not unique for use as a port
+      # identifier.
+      instanceShortName: ""
+      # GCP project where the instance exists.
+      project: "project"
+      # GCP region where the instance exists.
+      region: "region"
+      # Port number for the proxy to expose for this instance.
+      port: 5432
+      secure: false
 
 rbac:
   create: false
@@ -170,3 +171,11 @@ podDisruptionBudget: |
 ## Uncomment the term_timeout line for the proxy to wait your chosen time before terminating connections
 extraArgs: {}
 #  term_timeout: 30s
+
+ghostunnel:
+  image: squareup/ghostunnel
+  imageTag: "v1.5.2"
+  selfSignedCertificate:
+    enabled: false
+    issuer: self-signed
+    kind: ClusterIssuer
