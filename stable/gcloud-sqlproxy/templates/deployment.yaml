@@ -95,7 +95,9 @@ spec:
         image: "{{ $.Values.pgbouncer.image }}:{{ $.Values.pgbouncer.imageTag }}"
         imagePullPolicy: {{ default "" $.Values.pgbouncer.imagePullPolicy | quote }}
         command:
-        - pgbouncer
+        - /pgbouncer/bin/pgbouncer
+        - -u
+        - nobody
         - /config/pgbouncer.ini
         ports:
         - name: pgbouncer-{{ $index }}
