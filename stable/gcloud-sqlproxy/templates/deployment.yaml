@@ -123,8 +123,8 @@ spec:
 {{- range $index, $value := .Values.cloudsql.instances -}}
 {{- if .secure }}
       - name: pgbouncer-config-{{ $index }}
-        secret:
-          secretName: pgbouncer-config-{{ $index }}
+        configMap:
+          name: pgbouncer-config-{{ $index }}
 {{- end }}
 {{- end }}
       - name: cloudsql
