@@ -8,8 +8,8 @@ metadata:
   labels:
     {{- include "gcloud-sqlproxy.labels" $context | nindent 4 }}
   name: pgbouncer-config-{{ $index }}
-  data:
-    pgbouncer.ini: |-
+data:
+  pgbouncer.ini: |-
     [databases]
     postgres = localhost port={{ add 10000 .port }} dbname=postgres
 
