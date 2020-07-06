@@ -11,7 +11,7 @@ metadata:
 data:
   pgbouncer.ini: |-
     [databases]
-    postgres = localhost port={{ add 10000 .port }} dbname=postgres
+    * = localhost port={{ add 10000 .port }}
 
     [pgbouncer]
     pool_mode = session
