@@ -172,9 +172,9 @@ podDisruptionBudget: |
 extraArgs: {}
 #  term_timeout: 30s
 
-ghostunnel:
-  image: squareup/ghostunnel
-  imageTag: "v1.5.2"
+pgbouncer:
+  image: hyperized/pgbouncer
+  imageTag: "v1.14.0"
   selfSignedCertificate:
     enabled: false
     issuer: self-signed

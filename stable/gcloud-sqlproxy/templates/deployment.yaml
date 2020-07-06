@@ -91,24 +91,20 @@ spec:
           mountPath: /cloudsql
 {{- range $index, $value := .Values.cloudsql.instances -}}
 {{- if .secure }}
-      - name: ghostunnel-{{ $index }}
-        image: "{{ $.Values.ghostunnel.image }}:{{ $.Values.ghostunnel.imageTag }}"
-        imagePullPolicy: {{ default "" $.Values.ghostunnel.imagePullPolicy | quote }}
+      - name: pgbouncer-{{ $index }}
+        image: "{{ $.Values.pgbouncer.image }}:{{ $.Values.pgbouncer.imageTag }}"
+        imagePullPolicy: {{ default "" $.Values.pgbouncer.imagePullPolicy | quote }}
         command:
-        - ghostunnel
-        - server
-        - --listen=localhost:{{ .port }}
-        - --target=localhost:{{ add 10000 .port }}
-        - --cert=/secrets/sqltunnel/tls.key
-        - --key=/secrets/sqltunnel/tls.crt
-        - --cacert=/secrets/sqltunnel/ca.crt
-        - --allow-cn=all
+        - pgbouncer
+        - /config/pgbouncer.ini
         ports:
-        - name: ghostunnel-{{ $index }}
+        - name: pgbouncer-{{ $index }}
           containerPort: {{ .port }}
-        {{- if $.Values.ghostunnel.selfSignedCertificate.enabled }}
         volumeMounts:
-        - name: ghostunnel-tls-certificate
+        - name: pgbouncer-config-{{ $index }}
+          mountPath: /config
+        {{- if $.Values.pgbouncer.selfSignedCertificate.enabled }}
+        - name: pgbouncer-tls-certificate
           mountPath: /secrets/sqltunnel
         {{ end -}}
 {{- end }}
@@ -119,11 +115,18 @@ spec:
         secret:
           secretName: {{ include "gcloud-sqlproxy.secretName" . }}
       {{ end -}}
-      {{ if .Values.ghostunnel.selfSignedCertificate.enabled -}}
-      - name: ghostunnel-tls-certificate
+      {{ if .Values.pgbouncer.selfSignedCertificate.enabled -}}
+      - name: pgbouncer-tls-certificate
         secret:
           secretName: tls-{{ include "gcloud-sqlproxy.secretName" . }}
       {{ end -}}
+{{- range $index, $value := .Values.cloudsql.instances -}}
+{{- if .secure }}
+      - name: pgbouncer-config-{{ $index }}
+        secret:
+          secretName: pgbouncer-config-{{ $index }}
+{{- end }}
+{{- end }}
       - name: cloudsql
         emptyDir: {}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}

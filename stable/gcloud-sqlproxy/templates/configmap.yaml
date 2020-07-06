@@ -1,0 +1,29 @@
+{{ $context := . }}
+{{- range $index, $value := .Values.cloudsql.instances }}
+{{- if .secure }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "gcloud-sqlproxy.labels" $context | nindent 4 }}
+  name: pgbouncer-config-{{ $index }}
+  data:
+    pgbouncer.ini: |-
+    [databases]
+    postgres = localhost port={{ add 10000 .port }} dbname=postgres
+
+    [pgbouncer]
+    pool_mode = session
+    listen_port = {{ .port }}
+    listen_addr = 0.0.0.0
+    auth_type = any
+    logfile = pgbouncer.log
+    pidfile = pgbouncer.pid
+    server_tls_sslmode = require
+    client_tls_sslmode = require
+    client_tls_key_file = /secrets/sqltunnel/tls.key
+    client_tls_cert_file = /secrets/sqltunnel/tls.crt
+    client_tls_ca_file = /secrets/sqltunnel/ca.crt
+{{- end }}
+{{- end }}

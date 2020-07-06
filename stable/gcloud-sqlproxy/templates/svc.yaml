@@ -19,7 +19,7 @@ spec:
     protocol: TCP
     port: {{ .port }}
     {{- if .secure }}
-    targetPort: ghostunnel-{{ $index }}
+    targetPort: pgbouncer-{{ $index }}
     {{- else }}
     targetPort: {{ .instanceShortName | default (.instance | trunc 15) }}
     {{- end }}
